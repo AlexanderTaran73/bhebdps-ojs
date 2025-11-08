@@ -1,98 +1,85 @@
-describe("About Functions (about_functions.js)", function() {
-
-  it("should declare functions", function() {
-
-    function add(a, b) {
-      return a + b;
-    }
-
-    expect(add(1, 2)).toBe(FILL_ME_IN);
+describe("About Functions And Closure (about_functions_and_closure.js)", function() {
+  it("defining functions directly", function() {
+    let result = "a";
+    function changeResult() {
+      // Возможность доступа к переменным, определенным в той же области действия, что и функция, называется "замыканием".
+      result = "b";
+    };
+    changeResult();
+    // Какое значение будет у result после вызова функции changeResult?
+    expect("b").toBe(result);
   });
 
-  it("should know internal variables override outer variables", function () {
-    let message = "Outer";
-
-    function getMessage() {
-      return message;
-    }
-
-    function overrideMessage() {
-      let message = "Inner";
-      return message;
-    }
-
-    expect(getMessage()).toBe(FILL_ME_IN);
-    expect(overrideMessage()).toBe(FILL_ME_IN);
-    expect(message).toBe(FILL_ME_IN);
+  it("assigning functions to variables", function() {
+    let triple = function(input) {
+      return input * 3;
+    };
+    // Какое значение получим при передачи числа 4?
+    expect(12).toBe(triple(4));
   });
 
-  it("should have lexical scoping", function () {
-    let variable = "top-level";
-    function parentfunction() {
-      let variable = "local";
-      function childfunction() {
-        return variable;
+  it("self invoking functions", function() {
+    let publicValue = "shared";
+
+    // Самовызывающиеся функции (IIFE) используются для предоставления области действия и создания переменных.
+    (function(pv) {
+      let secretValue = "password";
+      // Какое значение будет в pv?
+      expect("shared").toBe(pv);
+      // Доступна ли переменная available в этом контексте и какой у неё тип?
+      expect("string").toBe(typeof secretValue);
+      // Доступна ли переменная publicValue в этом контексте и какой у неё тип?
+      expect("string").toBe(typeof publicValue);
+    })(publicValue);
+
+    // Доступна ли переменная available в этом контексте и какой у неё тип?
+    expect("undefined").toBe(typeof secretValue);
+    // Доступна ли переменная publicValue в этом контексте и какой у неё тип?
+    expect("string").toBe(typeof publicValue);
+  });
+
+  it("arguments array", function() {
+    let add = function() {
+      let total = 0;
+      for(let i = 0; i < arguments.length; i++) {
+        // Завершите реализацию этого метода так, чтобы он возвращал сумму своих аргументов
+        total += arguments[i]
       }
-      return childfunction();
-    }
-    expect(parentfunction()).toBe(FILL_ME_IN);
-  });
-
-  it("should use lexical scoping to synthesise functions", function () {
-
-    function makeMysteryFunction(makerValue){
-      let newFunction = function doMysteriousThing(param){
-        return makerValue + param;
-      };
-      return newFunction;
-    }
-
-    let mysteryFunction3 = makeMysteryFunction(3);
-    let mysteryFunction5 = makeMysteryFunction(5);
-
-    expect(mysteryFunction3(10) + mysteryFunction5(5)).toBe(FILL_ME_IN);
-  });
-
-  it("should allow extra function arguments", function () {
-
-    function returnFirstArg(firstArg) {
-      return firstArg;
-    }
-
-    expect(returnFirstArg("first", "second", "third")).toBe(FILL_ME_IN);
-
-    function returnSecondArg(firstArg, secondArg) {
-      return secondArg;
-    }
-
-    expect(returnSecondArg("only give first arg")).toBe(FILL_ME_IN);
-
-    function returnAllArgs() {
-      let argsArray = [];
-      for (let i = 0; i < arguments.length; i += 1) {
-        argsArray.push(arguments[i]);
-      }
-      return argsArray.join(",");
-    }
-
-    expect(returnAllArgs("first", "second", "third")).toBe("first,second,third");
-  });
-
-  it("should pass functions as values", function () {
-
-    let appendRules = function (name) {
-      return name + " rules!";
+      return total
     };
 
-    let appendDoubleRules = function (name) {
-      return name + " totally rules!";
+    // сложение 1,2,3,4,5
+    expect(15).toBe(add(1,2,3,4,5));
+    // сложение 4,7,-2
+    expect(9).toBe(add(4,7,-2));
+  });
+
+  it("using call to invoke function",function(){
+    let invokee = function( message ){
+      return this + message;
+    };
+    
+    // Еще один способ вызвать функцию — использовать метод call, который позволяет
+    // вам установить контекст «this» вызывающей стороны. Вызов может принимать любое количество аргументов:
+    // первый — это всегда контекст, который должен быть установлен в вызываемой
+    // функции, и аргументы, которые должны быть отправлены в функцию, несколько аргументов разделяются запятыми.
+    let result = invokee.call("I am this!", "Where did it come from?");
+
+    // Какой будет результат вызова функции invokee?
+    expect("I am this!Where did it come from?").toBe(result);
+  });
+
+  it("using apply to invoke function",function(){
+    let invokee = function( message1, message2 ){
+      return this + message1 + message2;  
     };
 
-    let praiseSinger = { givePraise: appendRules };
-    expect(praiseSinger.givePraise("John")).toBe(FILL_ME_IN);
+    // Похожим на метод call существует метод apply. У Apply есть только два
+    // аргумента: первый — контекст, который должен быть установлен в вызываемой
+    // функции, а второй — массив аргументов, которые должны быть переданы в вызываемую функцию.
+    let result = invokee.apply("I am this!", ["I am arg1","I am arg2"]);
 
-    praiseSinger.givePraise = appendDoubleRules;
-    expect(praiseSinger.givePraise("Mary")).toBe(FILL_ME_IN);
-
+    // Какой будет результат вызова функции invokee?
+    expect("I am this!I am arg1I am arg2").toBe(result);
   });
 });
